@@ -10,3 +10,4 @@ class Admin(Base):
     hashed_password = Column(String, nullable=False)
 
     conversations = relationship("ConversationHistory", back_populates="user")
+    documents = relationship("Document", back_populates="uploaded_by_admin")

@@ -10,7 +10,9 @@ class Document(Base):
     summary = Column(Text, nullable=False)
     tags = Column(String, nullable=False)
     chatbot_id = Column(Integer, ForeignKey("chatbot.id"), nullable=False)
-    uploaded_by_id = Column(Integer, ForeignKey("vendor.id"), nullable=False)
+    uploaded_by_id_vendor = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+    uploaded_by_id_admin = Column(Integer, ForeignKey("admin.id"), nullable=True)
 
-    uploaded_by = relationship("Vendor", back_populates="documents")
+    uploaded_by_vendor = relationship("Vendor", back_populates="documents")
+    uploaded_by_admin = relationship("Admin", back_populates="documents")
     chatbot = relationship("Chatbot", back_populates="documents")
