@@ -3,7 +3,7 @@ from pydantic import BaseModel
 class VendorChatbotBase(BaseModel):
     pass
 
-class VendorChatborRead(VendorChatbotBase):
+class VendorChatbotRead(VendorChatbotBase):
     id: int
     class Config:
         orm_mode = True
