@@ -9,10 +9,8 @@ class Conversation(Base):
     id = Column(Integer, primary_key=True, index=True)
     chatbot_id = Column(Integer, ForeignKey("chatbots.id"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
-    user_type = Column(Enum(UserType), default=UserType.external)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    start_time = Column(DateTime(timezone=True), server_default=func.now())
-    end_time = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     chatbot = relationship("Chatbot", back_populates="conversations")
     vendor = relationship("Vendor", back_populates="conversations")
@@ -22,10 +20,10 @@ class Conversation(Base):
 class Message(Base):
     __tablename__ = "messages"
     id = Column(Integer, primary_key=True, index=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False)
-    sender = Column(Enum(SenderType), nullable=False)
+    user_id =Column(Integer, ForeignKey("users.id"), nullable=False)
+    chatbot_id = Column(Integer, ForeignKey("chatbots.id"), nullable=False)
+    sender_type = Column(Enum(SenderType), nullable=False)
     content = Column(Text, nullable=False)
     token_count = Column(Integer, default=0)
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     conversation = relationship("Conversation", back_populates="messages")
