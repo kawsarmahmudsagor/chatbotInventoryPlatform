@@ -4,6 +4,7 @@ from typing import List
 from db.database import get_db
 from modules.vector_dbs.schemas.vector_db_schema import VectorDBCreate, VectorDBRead, VectorDBUpdate
 from modules.vector_dbs.services import vector_db_service
+from modules.vector_dbs.models.vector_db_model import VectorDB
 from modules.admins.models.admin_model import Admin
 from modules.auth.admins.auth_admin import get_current_admin
 
@@ -23,6 +24,11 @@ def get_vector_db(vector_db_id: int, db: Session = Depends(get_db), current_admi
     if not vector_db:
         raise HTTPException(status_code=404, detail="Vector Database not found")
     return vector_db
+
+@router.get("/agent/{agent_id}")
+def get_vector_db_by_agent(agent_id: int, db: Session = Depends(get_db)):
+    vdb = db.query(VectorDB).filter(VectorDB.agent_id == agent_id).first()
+    return vdb  # returns null/None if not found, frontend handles it
 
 @router.put("/update/{vector_db_id}", response_model=VectorDBRead)
 def update_vector_db(vector_db_id: int, vector_db_data: VectorDBUpdate, db: Session = Depends(get_db), current_admin: Admin = Depends(get_current_admin)):

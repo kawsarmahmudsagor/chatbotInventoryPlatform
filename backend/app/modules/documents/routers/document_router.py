@@ -11,21 +11,29 @@ from modules.auth.admins.auth_admin import get_current_admin
 
 router = APIRouter(tags=["Documents"])
 
-@router.post("/chatbots/{chatbot_id}/documents", response_model=List[DocumentRead])
+@router.get("/agent/{agent_id}", response_model=List[DocumentRead])
+def get_documents_by_agent(
+    agent_id: int,
+    db: Session = Depends(get_db),
+    current_vendor: Vendor = Depends(get_current_vendor),
+):
+    return document_service.get_documents_by_agent(db, agent_id)
+
+
+@router.post("/agents/{agent_id}/documents", response_model=List[DocumentRead])
 def upload_documents(
-    chatbot_id: int,
+    agent_id: int,
     files: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
+    current_vendor: Vendor = Depends(get_current_vendor),
 ):
-    saved_docs = document_service.create_documents_bulk(db, chatbot_id, files)
-
+    saved_docs = document_service.create_documents_bulk(db, agent_id, files)
     for doc in saved_docs:
         try:
-            vector_db = document_service.embed_document(db, doc.id)
+            document_service.embed_document(db, doc.id)
             doc.status = "embedded"
         except Exception as e:
             doc.status = "processing_failed"
-
     db.commit()
     return saved_docs
 
@@ -40,34 +48,16 @@ def get_document(document_id: int, db: Session = Depends(get_db), current_vendor
         raise HTTPException(status_code=404, detail="Document not found")
     return document
 
-@router.get("/specific_documents/{chatbot_id}", response_model=List[DocumentRead])
-def get_specific_documents(
-    chatbot_id: int,
-    db: Session = Depends(get_db),
-):
-    docs = document_service.get_specific_documents(db, chatbot_id)
-    return docs
-
-@router.get("/chatbots_documents/{chatbot_id}", response_model=List[DocumentRead])
-def get_documents_by_chatbot(chatbot_id: int, db: Session = Depends(get_db)):
-    documents = document_service.get_documents_by_chatbot(db, chatbot_id)
-    if not documents:
-        raise HTTPException(status_code=404, detail="No documents found for this chatbot")
-    return documents
-
-@router.put("/{document_id}", response_model=DocumentRead)
-def update_document(document_id: int, document_data: DocumentCreate, db: Session = Depends(get_db), current_vendor: Vendor = Depends(get_current_vendor)):
-    document = document_service.update_document(db, document_id, document_data)
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
-    return document
-
 @router.delete("/{document_id}")
-def delete_document(document_id: int, db: Session = Depends(get_db)):
-    success = document_service.delete_document(db, document_id)
-    if not success:
+def delete_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_vendor: Vendor = Depends(get_current_vendor),
+):
+    if not document_service.delete_document(db, document_id):
         raise HTTPException(status_code=404, detail="Document not found")
-    return {"detail": "Document deleted successfully"}
+    return {"message": "Document deleted"}
+
 
 @router.post("/documents/{document_id}/knowledge-base")
 def embed_document_endpoint(

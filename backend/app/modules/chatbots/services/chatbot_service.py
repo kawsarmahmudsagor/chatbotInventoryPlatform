@@ -13,56 +13,38 @@ from modules.conversations.models.conversation_model import Conversation
 from modules.embeddings.models.embedding_model import Embedding
 from modules.vendors.models.vendor_model import Vendor
 from modules.messages.models.messages_model import Message
-from modules.messages.services import mesasges_service
-from modules.vector_dbs.models.vector_db_model import VectorDB
-from modules.chatbots.schemas.chatbot_schema import ChatbotUpdate
 from modules.rag.services import rag_service
 from modules.users.models.user_model import User
 from modules.api_keys.models.api_model import APIKey
 from modules.chatbots.services import chatbot_service
-from modules.documents.services.document_service import create_documents_bulk, embed_document
+from modules.chatbots.models.chatbot_model import Chatbot
+from modules.chatbots.schemas.chatbot_schema import ChatbotCreate, ChatbotUpdate
 
 
-def create_chatbot_with_documents(
-    db,
-    vendor_id: int,
-    name: str,
-    description: str,
-    system_prompt: str,
-    llm_id: int,
-    llm_path: str,
-    vector_store_type: VectorStoreType,
-    is_active: bool = True,
-    files: list[UploadFile] | None = None
-):
-    # 1️⃣ Create Chatbot
-    chatbot = Chatbot(
-        vendor_id=vendor_id,
-        name=name,
-        description=description,
-        system_prompt=system_prompt,
-        llm_id=llm_id,
-        llm_path=llm_path,
-        vector_store_type=vector_store_type,
-        is_active=is_active
-    )
+def create_chatbot(db: Session, chatbot_data: ChatbotCreate) -> Chatbot:
+    chatbot = Chatbot(**chatbot_data.dict())
     db.add(chatbot)
     db.commit()
     db.refresh(chatbot)
+    return chatbot
 
-    saved_docs = []
-    if files:
-        saved_docs = create_documents_bulk(db, chatbot.id, files)
 
-    if saved_docs:
-        try:
-            embed_document(db, saved_docs[0].id)
-        except Exception as e:
-            for doc in saved_docs:
-                doc.status = DocumentStatus.processing_failed  
-            db.commit()
-            raise e
+def update_chatbot(
+    db: Session, chatbot_id: int, chatbot_data: ChatbotUpdate
+) -> Optional[Chatbot]:
+    chatbot = db.query(Chatbot).filter(Chatbot.id == chatbot_id).first()
+    if not chatbot:
+        return None
 
+    if chatbot_data.name        is not None: chatbot.name        = chatbot_data.name
+    if chatbot_data.vendor_id   is not None: chatbot.vendor_id   = chatbot_data.vendor_id
+    if chatbot_data.description is not None: chatbot.description = chatbot_data.description
+    if chatbot_data.llm_id      is not None: chatbot.llm_id      = chatbot_data.llm_id
+    if chatbot_data.llm_path    is not None: chatbot.llm_path    = chatbot_data.llm_path
+    if chatbot_data.is_active   is not None: chatbot.is_active   = chatbot_data.is_active
+
+    db.commit()
+    db.refresh(chatbot)
     return chatbot
 
 
@@ -120,43 +102,6 @@ def duplicate_chatbot(db: Session, chatbot_id: int):
     db.refresh(new_chatbot)
     return new_chatbot
 
-def update_chatbot_with_documents(
-    db: Session,
-    chatbot_id: int,
-    chatbot_data: ChatbotUpdate,
-    files: list[UploadFile] | None = None
-) -> Chatbot:
-    chatbot = db.query(Chatbot).get(chatbot_id)
-    if not chatbot:
-        return None
-
-    # Update chatbot fields
-    chatbot.name = chatbot_data.name or chatbot.name
-    chatbot.vendor_id = chatbot_data.vendor_id or chatbot.vendor_id
-    chatbot.description = chatbot_data.description or chatbot.description
-    chatbot.system_prompt = chatbot_data.system_prompt or chatbot.system_prompt
-    chatbot.llm_id = chatbot_data.llm_id or chatbot.llm_id
-    chatbot.llm_path = chatbot_data.llm_path or chatbot.llm_path
-    chatbot.vector_store_type = chatbot_data.vector_store_type or chatbot.vector_store_type
-    chatbot.is_active = chatbot_data.is_active if chatbot_data.is_active is not None else chatbot.is_active
-
-    db.add(chatbot)
-    db.commit()
-    db.refresh(chatbot)
-
-    if files:
-        saved_docs = create_documents_bulk(db, chatbot.vendor_id, chatbot.id, files)
-        if saved_docs:
-            try:
-                embed_document(db, saved_docs[0].id)
-            except Exception as e:
-                for doc in saved_docs:
-                    doc.status = DocumentStatus.processing_failed
-                db.commit()
-                raise e
-
-    return chatbot
-
 
 def delete_chatbot(db: Session, chatbot_id: int) -> bool:
     chatbot = db.query(Chatbot).get(chatbot_id)
@@ -165,16 +110,6 @@ def delete_chatbot(db: Session, chatbot_id: int) -> bool:
     db.delete(chatbot)
     db.commit()
     return True
-
-def get_latest_vector_db(chatbot: Chatbot) -> Optional[VectorDB]:
-    active_vdbs = [vdb for vdb in chatbot.vector_dbs if vdb.is_active]
-    if not active_vdbs:
-        return None
-
-    return max(
-        active_vdbs,
-        key=lambda v: (v.updated_at or v.created_at)
-    )
 
 def handle_conversation_singleturn(
     db: Session,
@@ -541,10 +476,3 @@ def get_global_top_chatbots(db: Session, limit: int = 3):
         }
         for r in rows
     ]
-
-
-
-
-
-
-  

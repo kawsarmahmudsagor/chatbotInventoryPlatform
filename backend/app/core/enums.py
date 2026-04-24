@@ -53,3 +53,17 @@ class EmbeddingProvider(str, enum.Enum):
 class VectorStoreType(str, enum.Enum):
     chroma = "chroma"
     faiss = "faiss"
+
+
+class AgentType(str, enum.Enum):
+    bank = "bank"
+    hotel = "hotel"
+
+class AgentStatus(str, enum.Enum):
+    active   = "active"
+    inactive = "inactive"
+
+class ToolStatus(str, enum.Enum):
+    success = "success"
+    failed = "failed"
+    error = "error"

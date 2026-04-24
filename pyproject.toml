@@ -50,4 +50,5 @@ dependencies = [
     "tokenizers>=0.22.1",
     "faiss-cpu>=1.13.2",
     "langchain-chroma>=1.1.0",
+    "paramiko>=4.0.0",
 ]

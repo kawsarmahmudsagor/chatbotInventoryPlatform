@@ -20,32 +20,65 @@ from modules.auth.users.auth_user import get_current_user, get_current_user_opti
 router = APIRouter(tags=["Chatbots"])
 
 @router.post("/create", response_model=ChatbotRead)
-def create_chatbot_endpoint(
-    name: str = Form(...),
-    vendor_id: int = Form(...),
+def create_chatbot(
+    vendor_id:   int            = Form(...),
+    name:        str            = Form(...),
     description: Optional[str] = Form(None),
-    system_prompt: Optional[str] = Form(None),
-    llm_id: int = Form(...),
-    llm_path: str = Form(...),
-    vector_store_type: VectorStoreType = Form(VectorStoreType.chroma),  
-    is_active: bool = Form(True), 
-    files: List[UploadFile] = File([]),  
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    llm_id:      int            = Form(...),
+    llm_path:    str            = Form(...),
+    is_active:   bool           = Form(True),
+    db:          Session        = Depends(get_db),
 ):
-    chatbot = chatbot_service.create_chatbot_with_documents(
-        db=db,
+    data = ChatbotCreate(
         vendor_id=vendor_id,
         name=name,
         description=description or "",
-        system_prompt=system_prompt or "",
         llm_id=llm_id,
         llm_path=llm_path,
-        vector_store_type=vector_store_type,
         is_active=is_active,
-        files=files
     )
+    return chatbot_service.create_chatbot(db, data)
+
+
+@router.put("/{chatbot_id}", response_model=ChatbotRead)
+def update_chatbot(
+    chatbot_id:  int,
+    name:        Optional[str]  = Form(None),
+    vendor_id:   Optional[int]  = Form(None),
+    description: Optional[str]  = Form(None),
+    llm_id:      Optional[int]  = Form(None),
+    llm_path:    Optional[str]  = Form(None),
+    is_active:   Optional[bool] = Form(None),
+    db:          Session        = Depends(get_db),
+):
+    data = ChatbotUpdate(
+        name=name, vendor_id=vendor_id, description=description,
+        llm_id=llm_id, llm_path=llm_path, is_active=is_active,
+    )
+    chatbot = chatbot_service.update_chatbot(db, chatbot_id, data)
+    if not chatbot:
+        raise HTTPException(status_code=404, detail="Chatbot not found")
     return chatbot
+
+
+@router.get("/{chatbot_id}", response_model=ChatbotRead)
+def get_chatbot(
+    chatbot_id: int,
+    db: Session = Depends(get_db),
+):
+    chatbot = chatbot_service.get_chatbot(db, chatbot_id)
+    if not chatbot:
+        raise HTTPException(status_code=404, detail="Chatbot not found")
+    return chatbot
+
+@router.delete("/{chatbot_id}")
+def delete_chatbot(
+    chatbot_id: int,
+    db: Session = Depends(get_db),
+):
+    if not chatbot_service.delete_chatbot(db, chatbot_id):
+        raise HTTPException(status_code=404, detail="Chatbot not found")
+    return {"message": "Chatbot deleted"}
 
 @router.get("/", response_model=List[ChatbotRead])
 def get_vendor_chatbots(db: Session = Depends(get_db),  current_vendor: Vendor = Depends(get_current_vendor)):
@@ -81,50 +114,6 @@ def role_based_stats(chatbot_id: int, user_role: UserRole, db: Session = Depends
     else:
         raise HTTPException(status_code=403, detail="User role not allowed")
 
-@router.put("/{chatbot_id}", response_model=ChatbotRead)
-async def update_chatbot_endpoint(
-    chatbot_id: int,
-    vendor_id: int = Form(...),
-    name: str = Form(...),
-    description: Optional[str] = Form(None),
-    system_prompt: Optional[str] = Form(None),
-    llm_id: int = Form(...),
-    llm_path: str = Form(...),
-    vector_store_type: VectorStoreType = Form(VectorStoreType.chroma),  
-    is_active: bool = Form(True), 
-    files: List[UploadFile] = File([]),  
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    chatbot_data = ChatbotUpdate(
-        name=name,
-        vendor_id=vendor_id,
-        description=description or "",
-        system_prompt=system_prompt or "",
-        llm_id=llm_id,
-        llm_path=llm_path,
-        vector_store_type=vector_store_type,
-        is_active=is_active
-    )
-
-    chatbot = chatbot_service.update_chatbot_with_documents(
-        db=db,
-        chatbot_id=chatbot_id,
-        chatbot_data=chatbot_data,
-        files=files if files else None
-    )
-
-    if not chatbot:
-        raise HTTPException(status_code=404, detail="Chatbot not found")
-
-    return chatbot
-
-@router.delete("/{chatbot_id}")
-def delete_chatbot(chatbot_id: int, db: Session = Depends(get_db), current_admin: Admin = Depends(get_current_admin)):
-    success = chatbot_service.delete_chatbot(db, chatbot_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Chatbot not found")
-    return {"detail": "Chatbot deleted successfully"}
 
 @router.post("/{token}/ask", response_model=ChatResponse)
 def chatbot_interaction_user_singleturn(

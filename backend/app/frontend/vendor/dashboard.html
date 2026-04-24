@@ -1,504 +1,1819 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vendor Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+
   <style>
-    body {
-      background-color: #e9ecef;
+    :root {
+      --bg: #0d0f14;
+      --surface: #151820;
+      --surface2: #1c2030;
+      --border: #252a38;
+      --accent: #e03a3a;
+      --accent-dim: rgba(224, 58, 58, 0.12);
+      --accent-glow: rgba(224, 58, 58, 0.3);
+      --text-1: #eef0f6;
+      --text-2: #8a90a8;
+      --text-3: #555c78;
+      --green: #2dd4a0;
+      --blue: #4d9ef7;
+      --amber: #f5a524;
+      --purple: #9d72ff;
+      --sidebar-w: 240px;
+      --topbar-h: 60px;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 0.18s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
       overflow-x: hidden;
     }
 
-    /* ================= TOP BAR ================= */
-    .top-bar {
-      background-color: #343a40;
-      color: white;
-      padding: 12px 16px;
-      border-radius: 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 99px;
+    }
+
+    /* TOP BAR */
+    .topbar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       z-index: 1000;
+      height: var(--topbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding: 0 24px 0 calc(var(--sidebar-w) + 24px);
     }
 
-    .top-bar h3 {
-      color: white;
-      margin: 0;
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--text-1);
       cursor: pointer;
-    }
-
-    .top-bar .dropdown-toggle {
-      color: white;
-      border-color: white;
-    }
-
-    /* ================= SIDEBAR ================= */
-    .sidebar {
-      position: fixed;
-      top: 56px;
-      left: 0;
-      width: 220px;
-      height: calc(100% - 56px);
-      background-color: #212529;
-      color: white;
-      padding: 12px 8px;
       display: flex;
-      flex-direction: column;
-      border-radius: 0;
+      align-items: center;
+      gap: 8px;
     }
 
-    .sidebar button {
-      width: 100%;
-      text-align: left;
-      border: none;
-      border-radius: 4px;
-      margin-bottom: 6px;
-      padding: 10px 12px;
-      background-color: #212529;
-      color: white;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-
-    .sidebar button:hover {
-      background-color: #343a40;
-    }
-
-    /* ================= MAIN CONTENT ================= */
-    .main-content {
-      margin-left: 220px;
-      padding: 80px 20px 20px 20px;
-    }
-
-    /* ================= ANALYTICS ================= */
-    #analyticsSection h4 { color: #343a40; }
-    #userAnalyticsCard { background-color: #ffffff; border: 1px solid #ffffff; margin-bottom: 16px; }
-    .analytics-card { background-color: #ffffff; border-radius: 8px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: transform 0.2s; }
-    .analytics-card:hover { transform: translateY(-3px); }
-
-    /* ================= TABLES & LISTS ================= */
-    table { background-color: #ffffff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-    table th { background-color: #adb5bd; color: black; }
-    #documentList li { background-color: #ffffff; border-bottom: 1px solid #dee2e6; transition: background-color 0.2s; }
-    #documentList li:hover { background-color: #adb5bd; color: black; }
-    #selectedFilesPreview li { background-color: #ffffff; padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; border: 1px solid #dee2e6; }
-
-    /* ================= CHAT BUBBLE ================= */
-    .chat-bubble {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #dc3545;
-      color: white;
+    .topbar-logo .logo-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      width: 55px;
-      height: 55px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .vendor-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 14px 4px 6px;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+
+    .vendor-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ff6b6b);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      z-index: 3000;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
     }
 
-    /* ================= CHAT WINDOW ================= */
-    .chat-window {
+    .topbar-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      border-radius: var(--radius-sm);
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topbar-btn:hover {
+      background: var(--surface2);
+      color: var(--text-1);
+      border-color: var(--text-3);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
       position: fixed;
-      bottom: 90px;
-      right: 20px;
-      width: 360px;        /* optional: slightly wider */
-      height: 520px;       /* 👈 initial visible height */
-      max-height: 70vh;    /* responsive safety */
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-      overflow: hidden;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      z-index: 3500;
+      padding-top: var(--topbar-h);
+      z-index: 999;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 8px 16px 4px;
+      font-family: 'Syne', sans-serif;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      margin: 2px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-2);
+      transition: all var(--transition);
+      border: none;
+      background: none;
+      width: calc(100% - 16px);
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+      width: 20px;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text-1);
+    }
+
+    .nav-item.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(224, 58, 58, 0.2);
+    }
+
+    .nav-item.active i {
+      color: var(--accent);
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 16px;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: var(--sidebar-w);
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
+
+    .page {
+      padding: 32px;
+      animation: fadeUp 0.22s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-1);
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-top: 4px;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color var(--transition);
+    }
+
+    .card:hover {
+      border-color: var(--text-3);
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .card-header-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title i {
+      color: var(--text-3);
+    }
+
+    /* STAT */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: all var(--transition);
+    }
+
+    .stat-card:hover {
+      border-color: var(--text-3);
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-3);
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--text-1);
+      line-height: 1;
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      margin-bottom: 14px;
+    }
+
+    .stat-icon.green {
+      background: rgba(45, 212, 160, 0.12);
+      color: var(--green);
+    }
+
+    .stat-icon.blue {
+      background: rgba(77, 158, 247, 0.12);
+      color: var(--blue);
+    }
+
+    .stat-icon.amber {
+      background: rgba(245, 165, 36, 0.12);
+      color: var(--amber);
+    }
+
+    .stat-icon.purple {
+      background: rgba(157, 114, 255, 0.12);
+      color: var(--purple);
+    }
+
+    /* TABLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      text-align: left;
+    }
+
+    .data-table td {
+      padding: 13px 16px;
+      font-size: 13px;
+      color: var(--text-2);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    .data-table tbody tr:hover td {
+      background: var(--surface2);
+      color: var(--text-1);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .badge-green {
+      background: rgba(45, 212, 160, 0.15);
+      color: var(--green);
+    }
+
+    .badge-red {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .badge-amber {
+      background: rgba(245, 165, 36, 0.15);
+      color: var(--amber);
+    }
+
+    .badge-blue {
+      background: rgba(77, 158, 247, 0.15);
+      color: var(--blue);
+    }
+
+    .badge-purple {
+      background: rgba(157, 114, 255, 0.15);
+      color: var(--purple);
+    }
+
+    .badge-gray {
+      background: rgba(138, 144, 168, 0.15);
+      color: var(--text-2);
+    }
+
+    /* BUTTONS */
+    .btn-primary-custom {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary-custom:hover {
+      background: #c72f2f;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      border-radius: var(--radius-sm);
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface2);
+      color: var(--text-1);
+    }
+
+    .btn-danger-sm {
+      background: rgba(224, 58, 58, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(224, 58, 58, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+    }
+
+    .btn-danger-sm:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-warning-sm {
+      background: rgba(245, 165, 36, 0.1);
+      color: var(--amber);
+      border: 1px solid rgba(245, 165, 36, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+    }
+
+    .btn-warning-sm:hover {
+      background: var(--amber);
+      color: white;
+    }
+
+    .btn-info-sm {
+      background: rgba(77, 158, 247, 0.1);
+      color: var(--blue);
+      border: 1px solid rgba(77, 158, 247, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+    }
+
+    .btn-info-sm:hover {
+      background: var(--blue);
+      color: white;
+    }
+
+    /* INPUTS */
+    .form-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-1);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 13px;
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color var(--transition);
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-3);
+    }
+
+    select.form-input option {
+      background: var(--surface2);
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      min-width: 160px;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-3);
+    }
+
+    .empty-state i {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* ANALYTICS */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* CODE */
+    .code-block {
+      background: #090b10;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #9de0ad;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    /* PAGINATION */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .pagination-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .page-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    /* TOAST */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast-msg {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      font-size: 13px;
+      color: var(--text-1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      animation: slideIn 0.2s ease both;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast-msg.success {
+      border-left: 3px solid var(--green);
+    }
+
+    .toast-msg.error {
+      border-left: 3px solid var(--accent);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* SPINNER */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-row td {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-3);
+    }
+
+    /* CHAT */
+    .chat-bubble {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      width: 52px;
+      height: 52px;
       display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--accent-glow);
+      z-index: 3000;
+      transition: all var(--transition);
+    }
+
+    .chat-bubble:hover {
+      transform: scale(1.08);
+    }
+
+    .chat-window {
+      position: fixed;
+      bottom: 88px;
+      right: 24px;
+      width: 360px;
+      height: 500px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 3500;
     }
 
     .chat-header {
-      background: #dc3545;
-      color: white;
-      padding: 12px;
-      font-weight: bold;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .chat-header-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-1);
     }
 
     .chat-messages {
       flex: 1;
-      padding: 12px;
+      padding: 16px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      background: #f5f5f5;
+      gap: 10px;
+      background: var(--bg);
     }
 
     .chat-message.user {
       align-self: flex-end;
-      background: #007bff;
+      background: var(--accent);
       color: white;
-      padding: 8px 12px;
-      border-radius: 16px;
-      border-bottom-right-radius: 0;
-      max-width: 75%;
+      padding: 9px 14px;
+      border-radius: 14px;
+      border-bottom-right-radius: 3px;
+      max-width: 78%;
+      font-size: 13px;
       word-wrap: break-word;
     }
 
     .chat-message.bot {
       align-self: flex-start;
-      background: #e4e6eb;
-      color: black;
-      padding: 8px 12px;
-      border-radius: 16px;
-      border-bottom-left-radius: 0;
-      max-width: 75%;
+      background: var(--surface2);
+      color: var(--text-1);
+      padding: 9px 14px;
+      border-radius: 14px;
+      border-bottom-left-radius: 3px;
+      max-width: 78%;
+      font-size: 13px;
       word-wrap: break-word;
+      border: 1px solid var(--border);
     }
 
     .chat-footer {
-      padding: 10px;
-      border-top: 1px solid #dee2e6;
+      padding: 12px;
+      border-top: 1px solid var(--border);
       display: flex;
       gap: 8px;
+      background: var(--surface);
     }
 
     .chat-footer input {
       flex: 1;
-      padding: 8px 12px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
+      padding: 8px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-1);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
       outline: none;
+    }
+
+    .chat-footer input:focus {
+      border-color: var(--accent);
     }
 
     .chat-footer button {
       padding: 8px 16px;
-      border-radius: 20px;
+      border-radius: 99px;
       border: none;
-      background: #007bff;
+      background: var(--accent);
       color: white;
       cursor: pointer;
+      transition: all var(--transition);
     }
 
     .chat-footer button:hover {
-      background: #0056b3;
-    }
-    .sidebar button.active {
-      background-color: #dc3545; /* red to indicate active */
-      font-weight: bold;
+      background: #c72f2f;
     }
 
+    /* MODALS */
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+    }
 
-    .d-none { display: none !important; }
+    .modal-header {
+      border-bottom: 1px solid var(--border);
+      font-family: 'Syne', sans-serif;
+    }
 
-    /* ================= MODERN ANALYTICS CARDS ================= */
-    .analytics-card {
-      border-radius: 14px;
-      padding: 18px;
-      color: white;
+    .modal-title {
+      font-weight: 700;
+    }
+
+    .modal-footer {
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-close {
+      filter: invert(1) opacity(0.5);
+    }
+
+    /* AGENT LOGS TABS */
+    .agent-type-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .agent-tab {
+      padding: 7px 18px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-2);
+      cursor: pointer;
+      font-size: 13px;
       font-weight: 500;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.05));
+      font-family: 'DM Sans', sans-serif;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    /* Smooth lift on hover */
-    .analytics-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+    .agent-tab:hover {
+      border-color: var(--text-3);
+      color: var(--text-1);
     }
 
-    /* Card colors (light versions) - keep your logic */
-    .card-blue { background: #4dabf7; }
-    .card-purple { background: #845ef7; }
-    .card-green { background: #51cf66; }
-    .card-cyan { background: #22b8cf; }
-
-    /* Tables inside cards */
-    .analytics-card table {
-      background: rgba(255,255,255,0.08);
-      border-collapse: separate;  /* allows spacing between rows */
-      border-spacing: 0 6px;      /* vertical spacing between rows */
-      border-radius: 10px;
-      color: white;
-      width: 100%;
-    }
-
-    /* Table headers */
-    .analytics-card table th {
-      background: rgba(255,255,255,0.25);
-      color: white;
+    .agent-tab.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
       font-weight: 600;
-      padding: 10px 12px;
-      border: none;
-      text-align: left;
-      border-radius: 6px 6px 0 0;
     }
 
-    /* Table body cells */
-    .analytics-card table tbody td {
-      padding: 10px 12px;
-      border: none;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.05); /* subtle row background */
-      transition: background 0.25s;
+    .log-desc {
+      max-width: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-1);
     }
 
-    /* Rounded edges for first and last cells */
-    .analytics-card table tbody td:first-child {
-      border-top-left-radius: 6px;
-      border-bottom-left-radius: 6px;
-    }
-    .analytics-card table tbody td:last-child {
-      border-top-right-radius: 6px;
-      border-bottom-right-radius: 6px;
-    }
-
-    /* Row hover effect */
-    .analytics-card table tbody tr:hover td {
-      background: rgba(255,255,255,0.12);
-    }
-
-    /* Optional striped effect */
-    .analytics-card table tbody tr:nth-child(odd) td {
-      background: rgba(255,255,255,0.04);
-    }
-    .analytics-card table tbody tr:nth-child(even) td {
-      background: rgba(255,255,255,0.08);
-    }
-
-    /* User Analytics Card (optional, for select user) */
-    #userAnalyticsCard {
-      background: #f8f9fa;
-      color: #212529;
-      border-radius: 14px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    /* SYSTEM PROMPT VIEWER */
+    .system-prompt-viewer {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       padding: 16px;
-      transition: transform 0.25s, box-shadow 0.25s;
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.7;
+      max-height: 320px;
+      overflow-y: auto;
     }
 
-    #userAnalyticsCard:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    .system-prompt-viewer h1,
+    .system-prompt-viewer h2,
+    .system-prompt-viewer h3 {
+      font-family: 'Syne', sans-serif;
+      color: var(--text-1);
+      margin: 12px 0 6px;
     }
 
+    .system-prompt-viewer p {
+      margin-bottom: 10px;
+    }
+
+    .system-prompt-viewer ul,
+    .system-prompt-viewer ol {
+      padding-left: 20px;
+      margin-bottom: 10px;
+    }
+
+    .system-prompt-viewer li {
+      margin-bottom: 4px;
+    }
+
+    .system-prompt-viewer strong {
+      color: var(--text-1);
+    }
+
+    .system-prompt-viewer code {
+      background: rgba(77, 158, 247, 0.1);
+      color: var(--blue);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .system-prompt-viewer blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+      color: var(--text-3);
+      margin: 8px 0;
+    }
+
+    /* QUILL */
+    .ql-toolbar {
+      background: var(--surface2) !important;
+      border-color: var(--border) !important;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+
+    .ql-toolbar .ql-stroke {
+      stroke: var(--text-2) !important;
+    }
+
+    .ql-toolbar .ql-fill {
+      fill: var(--text-2) !important;
+    }
+
+    .ql-toolbar button:hover .ql-stroke,
+    .ql-toolbar button.ql-active .ql-stroke {
+      stroke: var(--accent) !important;
+    }
+
+    .ql-toolbar button:hover .ql-fill,
+    .ql-toolbar button.ql-active .ql-fill {
+      fill: var(--accent) !important;
+    }
+
+    .ql-container {
+      background: var(--surface2) !important;
+      border-color: var(--border) !important;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      color: var(--text-1) !important;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+    }
+
+    .ql-editor.ql-blank::before {
+      color: var(--text-3) !important;
+      font-style: normal;
+    }
+
+    .d-none {
+      display: none !important;
+    }
   </style>
 </head>
 
 <body>
 
-<!-- ================= TOP BAR ================= -->
-<div class="top-bar">
-  <h3 onclick="showMainDashboard()">Vendor Dashboard</h3>
-  <div class="dropdown">
-    <button class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown">Profile</button>
-    <ul class="dropdown-menu dropdown-menu-end">
-      <li><a class="dropdown-item" href="#" onclick="showProfileForm()">Update Profile</a></li>
-      <li><a class="dropdown-item" href="#" onclick="showChangePasswordModal()">Change Password</a></li>
-      <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Logout</a></li>
-    </ul>
-  </div>
-</div>
+  <div class="toast-container" id="toastContainer"></div>
 
-<!-- ================= SIDEBAR ================= -->
-<div class="sidebar">
-  <button onclick="showMainDashboard()">Analytics</button>
-  <button onclick="loadChatbots()">Chatbots</button>
-  <button onclick="loadDocuments()">Documents</button>
-  <button onclick="loadAPITokens()">API Tokens</button>
-</div>
-
-<!-- ================= MAIN CONTENT ================= -->
-<div class="main-content">
-
-  <!-- Analytics Section -->
-  <div id="analyticsSection">
-    <h4 class="mb-3">Vendor Analytics</h4>
-    <div id="analyticsList" class="d-grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));"></div>
-    <div id="userAnalyticsCard" class="analytics-card card p-3 mt-3" style="max-width: 260px;">
-      <label class="form-label">Select User (optional)</label>
-      <select id="analyticsUserSelect" class="form-select mb-2 form-select-sm">
-        <option value="">All Users</option>
-      </select>
-      <div id="userAnalyticsContent" class="mt-2"><p>Select a user to see their data</p></div>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo" onclick="showMainDashboard()">
+        <div class="logo-dot"></div>
+        Vendor Portal
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="vendor-pill">
+        <div class="vendor-avatar" id="vendorInitial">V</div>
+        <span id="vendorNameDisplay">Vendor</span>
+      </div>
+      <div class="dropdown">
+        <button class="topbar-btn" data-bs-toggle="dropdown">
+          <i class="bi bi-person-circle"></i> Profile
+          <i class="bi bi-chevron-down" style="font-size:10px"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end"
+          style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);">
+          <li><a class="dropdown-item" href="#" onclick="showProfileForm()"
+              style="color:var(--text-2);font-size:13px;padding:8px 16px;"><i class="bi bi-person me-2"></i>Update
+              Profile</a></li>
+          <li><a class="dropdown-item" href="#" onclick="showChangePasswordModal()"
+              style="color:var(--text-2);font-size:13px;padding:8px 16px;"><i class="bi bi-shield-lock me-2"></i>Change
+              Password</a></li>
+          <li>
+            <hr style="border-color:var(--border);margin:4px 0">
+          </li>
+          <li><a class="dropdown-item" href="#" onclick="logout()"
+              style="color:var(--accent);font-size:13px;padding:8px 16px;"><i
+                class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <!-- Chatbots Section -->
-  <div id="chatbotsSection" class="d-none">
-    <h4 class="mb-3">Chatbots</h4>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>LLM</th>
-          <th>Vector Store</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="chatbotList"></tbody>
-    </table>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="section-label">Main</div>
+    <button class="nav-item active" id="nav-analytics" onclick="showMainDashboard(); setActiveNav('nav-analytics')">
+      <i class="bi bi-bar-chart-line"></i> Analytics
+    </button>
+    <button class="nav-item" id="nav-chatbots" onclick="loadChatbots(); setActiveNav('nav-chatbots')">
+      <i class="bi bi-robot"></i> Chatbots
+    </button>
+    <div class="sidebar-divider"></div>
+    <div class="section-label">Content</div>
+    <button class="nav-item" id="nav-documents" onclick="loadDocuments(); setActiveNav('nav-documents')">
+      <i class="bi bi-file-earmark-text"></i> Documents
+    </button>
+    <button class="nav-item" id="nav-agentMgmt" onclick="loadAgentMgmt(); setActiveNav('nav-agentMgmt')">
+      <i class="bi bi-cpu"></i> Agents
+    </button>
+    <button class="nav-item" id="nav-agents" onclick="loadAgents(); setActiveNav('nav-agents')">
+      <i class="bi bi-journal-text"></i> Agent Logs
+    </button>
+    <button class="nav-item" id="nav-llms" onclick="loadLLMs(); setActiveNav('nav-llms')">
+      <i class="bi bi-stars"></i> LLMs
+    </button>
+    <button class="nav-item" id="nav-embeddings" onclick="loadEmbeddings(); setActiveNav('nav-embeddings')">
+      <i class="bi bi-boxes"></i> Embeddings
+    </button>
+    <button class="nav-item" id="nav-apiTokens" onclick="loadAPITokens(); setActiveNav('nav-apiTokens')">
+      <i class="bi bi-key"></i> API Tokens
+    </button>
   </div>
 
-  <!-- Documents Section -->
-  <div id="documentsSection" class="d-none">
-    <h4 class="mb-3">Documents</h4>
-    <div class="card mb-3 p-3">
-      <label class="form-label">Select Chatbot</label>
-      <select id="documentChatbotSelect" class="form-select mb-2"></select>
-      <label class="form-label">Upload Documents</label>
-      <input type="file" class="form-control" multiple onchange="handleDocumentFileSelect(event)">
-      <ul id="selectedFilesPreview" class="mt-2 small text-muted"></ul>
-      <button class="btn btn-danger mt-2" onclick="uploadDocuments()">Upload</button>
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Analytics -->
+    <div id="analyticsSection" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Analytics</div>
+          <div class="page-subtitle">Overview of your chatbot performance</div>
+        </div>
+        <select id="analyticsUserSelect" class="form-input" style="width:200px;" onchange="loadAnalytics()">
+          <option value="">All Users</option>
+        </select>
+      </div>
+      <div id="userAnalyticsCard" class="d-none">
+        <div class="stat-grid" id="userAnalyticsContent"></div>
+      </div>
+      <div class="analytics-grid" id="analyticsList"></div>
     </div>
-    <ul id="documentList" class="list-group"></ul>
+
+    <!-- Chatbots -->
+    <div id="chatbotsSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Chatbots</div>
+          <div class="page-subtitle">Manage your deployed chatbots</div>
+        </div>
+        <button class="btn-primary-custom" onclick="openAddChatbotModal()"><i class="bi bi-plus-lg"></i> Add
+          Chatbot</button>
+      </div>
+      <div class="card">
+        <div class="card-header-section">
+          <div class="card-title"><i class="bi bi-robot"></i> Your Chatbots</div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>LLM</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="chatbotList">
+            <tr class="loading-row">
+              <td colspan="4"><span class="spinner"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Chatbot Details -->
+    <div id="chatbotDetailsSection" class="page d-none">
+      <div class="page-header">
+        <button class="btn-ghost" onclick="loadChatbots(); setActiveNav('nav-chatbots')"><i
+            class="bi bi-arrow-left"></i> Back</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header-section">
+              <div class="card-title"><i class="bi bi-info-circle"></i> Details</div>
+              <span id="detailsChatbotStatus" class="badge badge-green"></span>
+            </div>
+            <div class="card-body">
+              <h3 id="detailsChatbotName"
+                style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:12px;"></h3>
+              <div class="form-label">Created At</div>
+              <div id="detailsChatbotCreatedAt" style="font-size:13px;color:var(--text-2);margin-bottom:16px;"></div>
+              <div class="form-label">Description</div>
+              <div id="detailsChatbotDescription" style="font-size:13px;color:var(--text-2);"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header-section">
+              <div class="card-title"><i class="bi bi-code-slash"></i> Widget Snippet</div>
+              <button class="btn-ghost" id="copyWidgetBtn" style="font-size:12px;padding:5px 12px;"><i
+                  class="bi bi-clipboard"></i> Copy</button>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="code-block" id="detailsChatbotWidget"
+                style="border-radius:0 0 var(--radius) var(--radius);border:none;margin:0;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header-section">
+              <div class="card-title"><i class="bi bi-file-earmark"></i> Documents</div>
+            </div>
+            <div id="chatbotDocumentsContainer" style="padding:16px;max-height:280px;overflow-y:auto;"></div>
+            <div style="padding:16px;border-top:1px solid var(--border);">
+              <div class="form-label">Upload Documents</div>
+              <input type="file" id="documentFilesDetail" class="form-input" multiple style="padding:6px;"
+                onchange="Array.from(this.files).forEach(f=>{if(!selectedDetailFiles.some(x=>x.name===f.name))selectedDetailFiles.push(f);renderDetailSelectedFiles();})">
+              <ul id="selectedFilesPreviewDetail" style="list-style:none;margin-top:8px;"></ul>
+              <button class="btn-primary-custom" style="margin-top:8px;width:100%;"
+                onclick="uploadDocumentsForDetail()"><i class="bi bi-upload"></i> Upload</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div id="documentsSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Documents</div>
+          <div class="page-subtitle">Upload and manage knowledge</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;">
+        <div class="card" style="height:fit-content;">
+          <div class="card-header-section">
+            <div class="card-title"><i class="bi bi-upload"></i> Upload</div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+            <div><label class="form-label">Select Chatbot</label><select id="documentChatbotSelect"
+                class="form-input"></select></div>
+            <div><label class="form-label">Files</label><input type="file" class="form-input" style="padding:6px;"
+                multiple onchange="handleDocumentFileSelect(event)"></div>
+            <ul id="selectedFilesPreview" style="list-style:none;display:flex;flex-direction:column;gap:6px;"></ul>
+            <button class="btn-primary-custom" onclick="uploadDocuments()"><i class="bi bi-upload"></i> Upload
+              Documents</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header-section">
+            <div class="card-title"><i class="bi bi-files"></i> Documents</div>
+          </div>
+          <ul id="documentList" style="list-style:none;padding:8px;"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Management -->
+    <div id="agentMgmtSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Agents</div>
+          <div class="page-subtitle">Create and manage your AI agents</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <!-- Set Active Agent -->
+          <div
+            style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;">
+            <i class="bi bi-lightning-charge-fill" style="color:var(--amber);font-size:13px;flex-shrink:0;"></i>
+            <select id="activeAgentSelect" class="form-input"
+              style="width:120px;border:none;background:none;padding:0;font-size:13px;color:var(--text-2);">
+              <option value="">Set active…</option>
+              <option value="bank">Bank</option>
+              <option value="hotel">Hotel</option>
+            </select>
+            <button class="btn-primary-custom" style="padding:5px 12px;font-size:12px;"
+              onclick="activateAgentFromSelect()">
+              <i class="bi bi-check2-circle"></i> Activate
+            </button>
+          </div>
+          <button class="btn-primary-custom" onclick="openAddAgentModal()"><i class="bi bi-plus-lg"></i> New
+            Agent</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header-section">
+          <div class="card-title"><i class="bi bi-cpu"></i> Your Agents</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>LLM</th>
+                <th>Vector Store</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="agentMgmtList">
+              <tr class="loading-row">
+                <td colspan="6"><span class="spinner"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Details -->
+    <div id="agentDetailsSection" class="page d-none">
+      <div class="page-header">
+        <button class="btn-ghost" onclick="loadAgentMgmt(); setActiveNav('nav-agentMgmt')"><i
+            class="bi bi-arrow-left"></i> Back to Agents</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;">
+        <!-- Left -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header-section">
+              <div class="card-title"><i class="bi bi-info-circle"></i> Agent Info</div>
+              <span id="agentDetailStatus" class="badge"></span>
+            </div>
+            <div class="card-body">
+              <h3 id="agentDetailName"
+                style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:16px;"></h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                  <div class="form-label">Type</div>
+                  <div id="agentDetailType"></div>
+                </div>
+                <div>
+                  <div class="form-label">Vector Store</div>
+                  <div id="agentDetailVectorStore" style="font-size:13px;color:var(--text-2);"></div>
+                </div>
+                <div>
+                  <div class="form-label">Created At</div>
+                  <div id="agentDetailCreatedAt" style="font-size:13px;color:var(--text-2);"></div>
+                </div>
+              </div>
+              <div class="form-label">LLM</div>
+              <div id="agentDetailLLM" style="font-size:13px;color:var(--text-2);"></div>
+            </div>
+          </div>
+
+          <!-- System Prompt — nicely rendered -->
+          <div class="card">
+            <div class="card-header-section">
+              <div class="card-title"><i class="bi bi-terminal"></i> System Prompt</div>
+            </div>
+            <div class="card-body" style="padding:16px;">
+              <div id="agentDetailSystemPrompt" class="system-prompt-viewer">
+                <span style="color:var(--text-3);">No system prompt set.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vector DB -->
+          <div class="card">
+            <div class="card-header-section">
+              <div class="card-title"><i class="bi bi-database"></i> Vector Database</div>
+            </div>
+            <div class="card-body">
+              <div id="agentDetailVectorDB" style="font-size:13px;color:var(--text-2);">No vector DB attached yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header-section">
+              <div class="card-title"><i class="bi bi-file-earmark"></i> Documents</div>
+            </div>
+            <div id="agentDetailDocsList" style="padding:16px;max-height:320px;overflow-y:auto;"></div>
+            <div style="padding:16px;border-top:1px solid var(--border);">
+              <div class="form-label">Upload Documents</div>
+              <input type="file" id="agentDocFiles" class="form-input" multiple style="padding:6px;"
+                onchange="Array.from(this.files).forEach(f=>{if(!selectedAgentDetailFiles.some(x=>x.name===f.name))selectedAgentDetailFiles.push(f);renderAgentDetailFiles();})">
+              <ul id="agentDocFilesPreview" style="list-style:none;margin-top:8px;"></ul>
+              <button class="btn-primary-custom" style="margin-top:8px;width:100%;" onclick="uploadAgentDocuments()"><i
+                  class="bi bi-upload"></i> Upload</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Logs -->
+    <div id="agentsSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Agent Logs</div>
+          <div class="page-subtitle">Monitor what your AI agents are doing in real-time</div>
+        </div>
+        <button class="btn-ghost" onclick="loadAgentLogs()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+      </div>
+      <div class="agent-type-tabs">
+        <button class="agent-tab active" id="tab-all" onclick="selectAgentType(null,this)"><i class="bi bi-grid"></i>
+          All Agents</button>
+        <button class="agent-tab" id="tab-bank" onclick="selectAgentType('bank',this)"><i class="bi bi-bank"></i>
+          Bank</button>
+        <button class="agent-tab" id="tab-hotel" onclick="selectAgentType('hotel',this)"><i class="bi bi-building"></i>
+          Hotel</button>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-group"><label class="form-label">Agent Name</label><input type="text" id="filterAgentName"
+            class="form-input" placeholder="e.g. hotel" style="min-width:200px;"></div>
+        <div class="filter-group"><label class="form-label">Tool Status</label><select id="filterToolStatus"
+            class="form-input">
+            <option value="">All</option>
+            <option value="success">Success</option>
+            <option value="failed">Failed</option>
+            <option value="error">Error</option>
+          </select></div>
+        <div class="filter-group"><label class="form-label">Tool Name</label><input type="text" id="filterToolName"
+            class="form-input" placeholder="e.g. make_booking"></div>
+        <div class="filter-group"><label class="form-label">From</label><input type="date" id="filterFromDate"
+            class="form-input"></div>
+        <div class="filter-group"><label class="form-label">To</label><input type="date" id="filterToDate"
+            class="form-input"></div>
+        <div class="filter-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-primary-custom" onclick="applyAgentFilters()"><i class="bi bi-funnel"></i> Apply</button>
+            <button class="btn-ghost" onclick="clearAgentFilters()"><i class="bi bi-x"></i> Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header-section">
+          <div class="card-title"><i class="bi bi-list-ul"></i> Logs</div>
+          <span id="logCount" style="font-size:12px;color:var(--text-3);"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>Tool</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>User</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="agentLogsList">
+              <tr class="loading-row">
+                <td colspan="6"><span class="spinner"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination-bar" id="logsPagination" style="display:none;">
+          <span id="paginationInfo" style="font-size:12px;color:var(--text-3);"></span>
+          <div class="pagination-btns">
+            <button class="page-btn" id="prevPage" onclick="changePage(-1)"><i class="bi bi-chevron-left"></i>
+              Prev</button>
+            <button class="page-btn" id="nextPage" onclick="changePage(1)">Next <i
+                class="bi bi-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LLMs -->
+    <div id="llmsSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">LLMs</div>
+          <div class="page-subtitle">Manage language models</div>
+        </div>
+        <button class="btn-primary-custom" onclick="openAddLLMModal()"><i class="bi bi-plus-lg"></i> Add LLM</button>
+      </div>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Provider</th>
+              <th>Embedding</th>
+              <th>Limits (Token / Context)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="llmList">
+            <tr class="loading-row">
+              <td colspan="5"><span class="spinner"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Embeddings -->
+    <div id="embeddingsSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Embeddings</div>
+          <div class="page-subtitle">Manage embedding models</div>
+        </div>
+        <button class="btn-primary-custom" onclick="openAddEmbeddingModal()"><i class="bi bi-plus-lg"></i> Add
+          Embedding</button>
+      </div>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Model Name</th>
+              <th>Provider</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="embeddingList">
+            <tr class="loading-row">
+              <td colspan="3"><span class="spinner"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- API Tokens -->
+    <div id="apiTokensSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">API Tokens</div>
+          <div class="page-subtitle">Tokens for your chatbot integrations</div>
+        </div>
+      </div>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Chatbot</th>
+              <th>Domain</th>
+              <th>Token</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="apiTokensList">
+            <tr class="loading-row">
+              <td colspan="5"><span class="spinner"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div id="profileSection" class="page d-none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Profile</div>
+          <div class="page-subtitle">Manage your account details</div>
+        </div>
+      </div>
+      <div class="card" style="max-width:480px;">
+        <div class="card-header-section">
+          <div class="card-title"><i class="bi bi-person"></i> Account Info</div>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+          <div><label class="form-label">Name</label><input id="vendorName" class="form-input" type="text"></div>
+          <div><label class="form-label">Email</label><input id="vendorEmail" class="form-input" type="email"></div>
+          <div><label class="form-label">Domain</label><input id="vendorDomain" class="form-input" type="text"></div>
+          <button class="btn-primary-custom" onclick="saveProfile()"><i class="bi bi-check2"></i> Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- CHAT BUBBLE & WINDOW -->
+  <div id="chatBubble" class="chat-bubble"><i class="bi bi-chat-dots-fill"></i></div>
+  <div id="chatWindow" class="chat-window">
+    <div class="chat-header">
+      <span class="chat-header-name" id="chatHeaderName">Bot</span>
+      <button onclick="closeChat()"
+        style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:16px;"><i
+          class="bi bi-x-lg"></i></button>
+    </div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="chat-footer">
+      <input type="text" id="chatInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
+    </div>
   </div>
 
-  <!-- API Tokens Section -->
-  <div id="apiTokensSection" class="d-none">
-    <h3>API Tokens</h3>
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>Chatbot</th>
-          <th>Vendor Domain</th>
-          <th>Token</th>
-          <th>Status</th>
-          <th>Created At</th>
-        </tr>
-      </thead>
-      <tbody id="apiTokensList">
-        <!-- API keys will be loaded here -->
-      </tbody>
-    </table>
-  </div>
-
-
-  <!-- Profile Section -->
-  <div id="profileSection" class="d-none">
-    <h4 class="mb-3">Update Profile</h4>
-    <div class="mb-2">
-      <label>Name</label>
-      <input id="vendorName" class="form-control">
-    </div>
-    <div class="mb-2">
-      <label>Email</label>
-      <input id="vendorEmail" class="form-control">
-    </div>
-    <div class="mb-2">
-      <label>Domain</label>
-      <input id="vendorDomain" class="form-control">
-    </div>
-    <button class="btn btn-danger" onclick="saveProfile()">Save</button>
-  </div>
-
-  <!-- Change Password Modal -->
-  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+  <!-- CHANGE PASSWORD MODAL -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title">Change Password</h5><button type="button" class="btn-close"
+            data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="currentPassword" class="form-label">Current Password</label>
-            <input type="password" id="currentPassword" class="form-control">
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:24px;">
+          <div><label class="form-label">Current Password</label><input type="password" id="currentPassword"
+              class="form-input"></div>
+          <div><label class="form-label">New Password</label><input type="password" id="newPassword" class="form-input">
           </div>
-          <div class="mb-3">
-            <label for="newPassword" class="form-label">New Password</label>
-            <input type="password" id="newPassword" class="form-control">
+          <div><label class="form-label">Confirm New Password</label><input type="password" id="confirmNewPassword"
+              class="form-input"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn-primary-custom" onclick="submitChangePassword()"><i class="bi bi-shield-check"></i> Update
+            Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATBOT MODAL -->
+  <div class="modal fade" id="chatbotModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="chatbotModalTitle">Add Chatbot</h5><button type="button" class="btn-close"
+            data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:24px;">
+          <input type="hidden" id="chatbotId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div><label class="form-label">Name</label><input type="text" id="chatbotName" class="form-input"
+                placeholder="My Chatbot"></div>
+            <div><label class="form-label">Status</label><select id="chatbotIsActive" class="form-input">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select></div>
           </div>
-          <div class="mb-3">
-            <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
-            <input type="password" id="confirmNewPassword" class="form-control">
+          <div><label class="form-label">Description</label><input type="text" id="chatbotDescription"
+              class="form-input" placeholder="Optional description"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div><label class="form-label">LLM</label><select id="chatbotLLMId" class="form-input"
+                onchange="updateLLMPath()"></select></div>
+            <div><label class="form-label">LLM Path <span
+                  style="color:var(--text-3);font-size:11px;text-transform:none;">(override)</span></label><input
+                type="text" id="chatbotLLMPath" class="form-input" placeholder="Optional"></div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger" onclick="submitChangePassword()">Submit</button>
+          <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn-primary-custom" onclick="submitChatbotForm()"><i class="bi bi-check2"></i> Save</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ================= Chatbot Details Section ================= -->
-  <div id="chatbotDetailsSection" class="d-none">
-    <button class="btn btn-secondary mb-3" onclick="loadChatbots()">← Back to Chatbots</button>
-    <div class="card p-3 mb-3">
-      <h4 id="detailsChatbotName"></h4>
-      <p><strong>Status:</strong> <span id="detailsChatbotStatus"></span></p>
-      <p><strong>Created At:</strong> <span id="detailsChatbotCreatedAt"></span></p>
-      <p><strong>Description:</strong> <span id="detailsChatbotDescription"></span></p>
-      <p><strong>System Prompt:</strong></p>
-      <pre id="detailsChatbotSystemPrompt"></pre>
-
-      <!-- Widget Snippet Section -->
-      <h5 class="mt-4">🔌 Widget</h5>
-      <div id="detailsChatbotWidgetContainer" class="p-3 mb-3 rounded position-relative" 
-          style="background-color: #1e1e1e;">
-        <pre id="detailsChatbotWidget" class="mb-2" 
-            style="color: #ffffff; white-space: pre-wrap; margin-top: 35px;"></pre>
-        <small class="text-light d-block mt-1">
-          Click "Copy" to copy the snippet to clipboard
-        </small>
-      </div>
-
-
-
-
-      <div class="card shadow-sm p-3 mb-3">
-        <h5>📄 Documents</h5>
-        <div id="chatbotDocumentsContainer">Loading documents...</div>
-
-        <!-- Upload Documents in Details Page -->
-        <div class="mt-3">
-          <label for="documentFilesDetail" class="form-label">Upload Documents</label>
-          <input type="file" id="documentFilesDetail" class="form-control" multiple
-            onchange="Array.from(this.files).forEach(f => {
-              if(!selectedDetailFiles.some(x => x.name === f.name)) selectedDetailFiles.push(f);
-              renderDetailSelectedFiles();
-            })">
-          <ul id="selectedFilesPreviewDetail" class="list-group mt-2 mb-2"></ul>
-          <button class="btn btn-primary" onclick="uploadDocumentsForDetail()">Upload</button>
+  <!-- AGENT MODAL -->
+  <div class="modal fade" id="agentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="agentModalTitle">New Agent</h5><button type="button" class="btn-close"
+            data-bs-dismiss="modal"></button>
         </div>
-      </div>
-    </div>
-
-    <!-- Chat Bubble -->
-    <div id="chatBubble" class="chat-bubble" onclick="toggleChat()">💬</div>
-
-    <!-- Chat Window -->
-    <div id="chatWindow" class="chat-window">
-      <div class="chat-header">
-        <span id="chatHeaderName">Bot</span>
-        <button class="btn btn-sm btn-light" onclick="closeChat()">✖</button>
-      </div>
-      <div id="chatMessages" class="chat-messages"></div>
-      <div class="chat-footer">
-        <input type="text" id="chatInput" placeholder="Type a message...">
-        <button onclick="sendMessage()">Send</button>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:24px;">
+          <input type="hidden" id="agentId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div><label class="form-label">Agent Type</label>
+              <select id="agentType" class="form-input">
+                <option value="">-- Select Type --</option>
+                <option value="bank">Bank</option>
+                <option value="hotel">Hotel</option>
+              </select>
+            </div>
+            <div><label class="form-label">Agent Name</label><input type="text" id="agentName" class="form-input"
+                placeholder="e.g. hotel"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div><label class="form-label">LLM</label><select id="agentLLMId" class="form-input"
+                  onchange="updateLLMPath()"></select></div>
+              <div><label class="form-label">LLM Path <span
+                    style="color:var(--text-3);font-size:11px;text-transform:none;">(override)</span></label><input
+                  type="text" id="agentLLMPath" class="form-input" placeholder="Optional"></div>
+            </div>
+            <div><label class="form-label">Vector Store</label>
+              <select id="agentVectorStore" class="form-input">
+                <option value="chroma">Chroma</option>
+              </select>
+            </div>
+          </div>
+          <div><label class="form-label">Status</label>
+            <select id="agentStatus" class="form-input">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">System Prompt</label>
+            <div id="agentSystemPromptEditor"
+              style="background:var(--surface2);border-radius:var(--radius-sm);min-height:140px;"></div>
+          </div>
+          <div>
+            <label class="form-label">Upload Documents <span
+                style="color:var(--text-3);font-size:11px;text-transform:none;">(optional)</span></label>
+            <input type="file" id="agentFiles" class="form-input" multiple style="padding:6px;"
+              onchange="handleAgentFileSelect(event)">
+            <div id="agentFilesPreview" style="margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn-primary-custom" onclick="submitAgentForm()"><i class="bi bi-check2"></i> Save
+            Agent</button>
+        </div>
       </div>
     </div>
   </div>
 
-</div>
+  <!-- EMBEDDING MODAL -->
+  <div class="modal fade" id="embeddingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="embeddingModalTitle">Add Embedding</h5><button type="button" class="btn-close"
+            data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:24px;">
+          <input type="hidden" id="embeddingId">
+          <div><label class="form-label">Model Name</label><input type="text" id="embeddingModelName" class="form-input"
+              placeholder="e.g. nomic-embed-text"></div>
+          <div><label class="form-label">Provider</label>
+            <select id="embeddingProvider" class="form-input">
+              <option value="ollama">Ollama</option>
+              <option value="openai">OpenAI</option>
+              <option value="cohere">Cohere</option>
+              <option value="huggingface">HuggingFace</option>
+              <option value="local">Local</option>
+            </select>
+          </div>
+          <div><label class="form-label">Path <span
+                style="color:var(--text-3);font-size:11px;text-transform:none;">(model string or local
+                path)</span></label><input type="text" id="embeddingPath" class="form-input"
+              placeholder="e.g. nomic-embed-text"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn-primary-custom" onclick="submitEmbeddingForm()"><i class="bi bi-check2"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/static/vendor/dashboard.js"></script>
+  <!-- LLM MODAL -->
+  <div class="modal fade" id="llmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="llmModalTitle">Add LLM</h5><button type="button" class="btn-close"
+            data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:24px;">
+          <input type="hidden" id="llmId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div><label class="form-label">Name</label><input type="text" id="llmName" class="form-input"
+                placeholder="e.g. Gemma 4"></div>
+            <div><label class="form-label">Provider</label>
+              <select id="llmProvider" class="form-input">
+                <option value="ollama">Ollama</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="cohere">Cohere</option>
+                <option value="huggingface">HuggingFace</option>
+                <option value="google">Google</option>
+                <option value="azure">Azure</option>
+                <option value="local">Local</option>
+              </select>
+            </div>
+            <div><label class="form-label">Token Limit</label><input type="number" id="llmTokenLimit" class="form-input"
+                placeholder="e.g. 4096"></div>
+            <div><label class="form-label">Context Limit</label><input type="number" id="llmContextLimit"
+                class="form-input" placeholder="e.g. 8192"></div>
+          </div>
+          <div><label class="form-label">Embedding Model</label><select id="llmEmbeddingId" class="form-input"></select>
+          </div>
+          <div><label class="form-label">Path <span
+                style="color:var(--text-3);font-size:11px;text-transform:none;">(model string or local
+                path)</span></label><input type="text" id="llmPath" class="form-input" placeholder="e.g. gemma4:e4b">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn-primary-custom" onclick="submitLLMForm()"><i class="bi bi-check2"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE API TOKEN MODAL -->
+  <div class="modal fade" id="createApiTokenModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create API Token</h5><button type="button" class="btn-close"
+            data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:24px;">
+          <div><label class="form-label">Chatbot</label><select id="apiTokenChatbotSelect" class="form-input"></select>
+          </div>
+          <div><label class="form-label">Domain</label><input type="text" id="apiTokenDomain" class="form-input"
+              placeholder="e.g. yourdomain.com"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn-primary-custom" onclick="submitCreateApiToken()"><i class="bi bi-check2"></i> Create
+            Token</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/vendor/dashboard.js"></script>
 </body>
+
 </html>

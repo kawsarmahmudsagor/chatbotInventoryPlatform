@@ -180,7 +180,7 @@ async function showChatbotDetails(chatbotId) {
     // Prepare the widget snippet as text (not executed)
     const widgetSnippet = `
       <script 
-        src="https://cabin-allocated-accidents-examined.trycloudflare.com/static/widget.js" 
+        src="https://seekers-beside-absent-computational.trycloudflare.com/static/widget.js" 
         data-chatbot-name="${data.name}" 
         data-chatbot-token="${widgetToken}">
       </script>

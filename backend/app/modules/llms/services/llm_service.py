@@ -5,18 +5,13 @@ from modules.llms.models.llm_model import LLM
 from modules.llms.schemas.llm_schema import LLMCreate, LLMUpdate
 
 
-
-
-def create_llm(db: Session, data: LLMCreate) ->LLM:
-    """Create LLM record and start background pull."""
-    llm = LLM(**data.dict())
+def create_llm(db: Session, data: LLMCreate, vendor_id: int) -> LLM:
+    llm = LLM(**data.dict(), vendor_id=vendor_id)
     db.add(llm)
     db.commit()
     db.refresh(llm)
-
-    # Trigger pull
-    pull_in_background(llm.path)
-
+    if llm.path:
+        pull_in_background(llm.path)
     return llm
 
 
@@ -27,16 +22,22 @@ def pull_in_background(path: str):
     ).start()
 
 
-def get_llms(db: Session) -> List[LLM]:
-    return db.query(LLM).all()
+def get_llms(db: Session, vendor_id: int) -> List[LLM]:
+    return db.query(LLM).filter(LLM.vendor_id == vendor_id).all()
 
 
-def get_llm(db: Session, llm_id: int) -> Optional[LLM]:
-    return db.query(LLM).filter(LLM.id == llm_id).first()
+def get_llm(db: Session, llm_id: int, vendor_id: int) -> Optional[LLM]:
+    return db.query(LLM).filter(
+        LLM.id == llm_id,
+        LLM.vendor_id == vendor_id
+    ).first()
 
 
-def update_llm(db: Session, llm_id: int, llm_data: LLMUpdate) -> Optional[LLM]:
-    llm = db.query(LLM).filter(LLM.id == llm_id).first()
+def update_llm(db: Session, llm_id: int, llm_data: LLMUpdate, vendor_id: int) -> Optional[LLM]:
+    llm = db.query(LLM).filter(
+        LLM.id == llm_id,
+        LLM.vendor_id == vendor_id
+    ).first()
     if not llm:
         return None
     for key, value in llm_data.dict(exclude_unset=True).items():
@@ -46,34 +47,13 @@ def update_llm(db: Session, llm_id: int, llm_data: LLMUpdate) -> Optional[LLM]:
     return llm
 
 
-def delete_llm(db: Session, llm_id: int) -> bool:
-    llm = db.query(LLM).filter(LLM.id == llm_id).first()
+def delete_llm(db: Session, llm_id: int, vendor_id: int) -> bool:
+    llm = db.query(LLM).filter(
+        LLM.id == llm_id,
+        LLM.vendor_id == vendor_id
+    ).first()
     if not llm:
         return False
     db.delete(llm)
     db.commit()
     return True
-
-
-# def trigger_pull(db: Session, llm_id: int) -> Optional[LLM]:
-#     llm = get_llm(db, llm_id)
-#     if not llm:
-#         return None
-#     pull_ollama_model.delay(llm.id, llm.path)
-#     return llm
-
-
-# def bulk_pull(db: Session, ids: List[int]) -> List[LLM]:
-#     llms = db.query(LLM).filter(LLM.id.in_(ids)).all()
-#     for l in llms:
-#         pull_ollama_model.delay(l.id, l.path)
-#     return llms
-
-
-# def trigger_sync_registry():
-#     # fire-and-forget: Celery will run sync and update DB
-#     try:
-#         sync_ollama_models.delay()
-#     except Exception:
-#         pass
-
